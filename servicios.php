@@ -150,7 +150,7 @@ include 'includes/header.php';
                     $stars = str_repeat('★', $rev['rating']);
                     $rev_id = $rev['id'];
 
-                    echo '<div class="opinion-card animate-slide" style="position: relative;">';
+                    echo '<div class="opinion-card animate-slide">';
 
                     // BOTÓN ELIMINAR (Solo para Administradores con Icono SVG)
                     if ($is_admin) {
@@ -158,7 +158,7 @@ include 'includes/header.php';
                                  onclick="return confirm(\'¿Estás seguro de eliminar esta opinión?\')"
                                  class="delete-review-btn" 
                                  title="Eliminar Opinión">
-                                 <img src="img/icons/cancel.svg" alt="Eliminar" style="width: 100%;">
+                                 <img src="img/icons/cancel.svg" alt="Eliminar" class="delete-icon-img">
                               </a>';
                     }
 

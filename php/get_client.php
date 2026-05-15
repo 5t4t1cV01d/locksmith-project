@@ -1,12 +1,11 @@
 <?php
 // ARCHIVO: php/get_client.php
-require '../conexion.php';
-require '../seguridad.php';
+ob_start();
+require_once '../conexion.php';
+require_once '../seguridad.php';
+ob_clean(); 
 
 header('Content-Type: application/json');
-
-// header('Content-Type: application/json'); // Ya está arriba
-// Eliminamos restricción de admin para permitir autocompletado al cliente público
 
 $phone = $_GET['phone'] ?? '';
 
@@ -22,12 +21,13 @@ if (!empty($phone)) {
         if ($client) {
             echo json_encode(['success' => true, 'client' => $client]);
         } else {
-            echo json_encode(['success' => false]);
+            echo json_encode(['success' => false, 'msg' => 'No encontrado']);
         }
     } catch (PDOException $e) {
-        echo json_encode(['error' => 'Error de BD']);
+        echo json_encode(['success' => false, 'error' => 'Error de BD']);
     }
 } else {
-    echo json_encode(['error' => 'Teléfono vacío']);
+    echo json_encode(['success' => false, 'error' => 'Teléfono vacío']);
 }
+exit();
 ?>

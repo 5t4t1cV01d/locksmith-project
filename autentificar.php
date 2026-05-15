@@ -34,14 +34,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Verificamos si existe el usuario y si la contraseña coincide
-        // Probamos primero con password_verify (si es un hash) y luego con texto plano
-        if ($user && (password_verify($password, $user['password']) || $password === $user['password'])) {
-            
-            // Iniciar sesión y guardar datos CRUCIALES
-            if (session_status() == PHP_SESSION_NONE) {
-                session_start();
-            }
+        if ($user && password_verify($password, $user['password'])) {
+            if (session_status() === PHP_SESSION_NONE) session_start();
             
             $_SESSION['user_id'] = $user['id']; 
             $_SESSION['user_email'] = $user['email'];

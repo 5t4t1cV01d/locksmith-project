@@ -63,7 +63,7 @@ include 'includes/header.php';
                 </div>
 
                 <!-- CONTENEDOR PARA NO REGISTRADOS -->
-                <div id="not-registered-msg" style="display: none;" class="status-alert error animate-slide">
+                <div id="not-registered-msg" class="status-alert error animate-slide u-hidden">
                     <b>⚠️ No encontramos su número en nuestro sistema.</b><br>
                     Para su primer servicio, por favor utilice la opción de <b>Llamada</b> o <b>WhatsApp</b> arriba para que un administrador lo dé de alta. ¡Gracias!
                 </div>
@@ -121,7 +121,7 @@ include 'includes/header.php';
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-top: 15px;">
+                    <div class="form-group u-mt-15">
                         <label for="notas">DETALLES O NOTAS ADICIONALES (OBLIGATORIO):</label>
                         <textarea id="notas" name="notas" rows="3" placeholder="Ej. Se me perdieron las llaves, la chapa está dura..."></textarea>
                     </div>
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. Mostrar Formulario
     showFormBtn.addEventListener('click', function() {
         formSection.classList.remove('hidden-init');
-        formSection.style.display = 'block';
+        formSection.classList.add('u-block');
         formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         phoneInput.focus();
     });
@@ -224,9 +224,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         phoneStatus.classList.add('status-success');
                         phoneStatus.innerHTML = `✅ ¡Bienvenido, ${data.client.name}!`;
                         nameInput.value = data.client.name;
-                        addressInput.value = data.client.address;
+                        addressInput.value = data.client.address || data.client.domicilio || '';
                         workDetailsStep.style.display = 'block';
+                        notRegisteredMsg.classList.add('u-hidden');
                     } else {
+                        notRegisteredMsg.classList.remove('u-hidden');
                         notRegisteredMsg.style.display = 'block';
                         phoneStatus.style.display = 'none';
                     }

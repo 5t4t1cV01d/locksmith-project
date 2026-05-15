@@ -27,7 +27,7 @@ function render_admin_service_row($servicio)
     $id = htmlspecialchars($servicio['id']);
 
     // Lógica de Programación / Cita
-    $cita_info = '<span style="color: #ea3323; font-weight: 900;">🚨 INMEDIATO</span>';
+    $cita_info = '<span class="text-emergency">🚨 INMEDIATO</span>';
     if (!empty($servicio['appointment_date'])) {
         $cita_info = '<b>📅 ' . htmlspecialchars($servicio['appointment_date']) . '</b><br>';
         $cita_info .= '<small>⏰ ' . htmlspecialchars($servicio['appointment_time']) . '</small>';
@@ -38,19 +38,19 @@ function render_admin_service_row($servicio)
     if ($status === 'Pendiente') {
         $actionsContent .= '<a href="dashboard_ver.php?action=process&id=' . $id . '" class="action-btn-mini btn-atender" title="Atender"><i class="fa-solid fa-truck-fast"></i> Atender</a>';
         $actionsContent .= '<a href="dashboard_ver.php?action=complete&id=' . $id . '" class="action-btn-mini btn-finalizar" title="Finalizar"><i class="fa-solid fa-check-double"></i> Finalizar</a>';
-        $actionsContent .= '<button class="action-btn-mini btn-cancelar cancel-trigger" data-id="' . $id . '" title="Cancelar" style="grid-column: span 2;"><i class="fa-solid fa-xmark"></i> Cancelar</button>';
+        $actionsContent .= '<button class="action-btn-mini btn-cancelar cancel-trigger grid-2nd-col" data-id="' . $id . '" title="Cancelar"><i class="fa-solid fa-xmark"></i> Cancelar</button>';
     } elseif ($status === 'En Camino') {
-        $actionsContent .= '<a href="dashboard_ver.php?action=complete&id=' . $id . '" class="action-btn-mini btn-finalizar" title="Finalizar" style="grid-column: span 2;"><i class="fa-solid fa-check-double"></i> Finalizar</a>';
-        $actionsContent .= '<button class="action-btn-mini btn-cancelar cancel-trigger" data-id="' . $id . '" title="Cancelar" style="grid-column: span 2;"><i class="fa-solid fa-xmark"></i> Cancelar</button>';
+        $actionsContent .= '<a href="dashboard_ver.php?action=complete&id=' . $id . '" class="action-btn-mini btn-finalizar grid-2nd-col" title="Finalizar"><i class="fa-solid fa-check-double"></i> Finalizar</a>';
+        $actionsContent .= '<button class="action-btn-mini btn-cancelar cancel-trigger grid-2nd-col" data-id="' . $id . '" title="Cancelar"><i class="fa-solid fa-xmark"></i> Cancelar</button>';
     }
 
-    $actionsContent .= '<button class="action-btn-mini btn-ver view-trigger" data-detail=\'' . htmlspecialchars(json_encode($servicio)) . '\' title="Ver Ficha" style="grid-column: span 2;"><i class="fa-solid fa-eye"></i> Ver Ficha</button>';
+    $actionsContent .= '<button class="action-btn-mini btn-ver view-trigger grid-2nd-col" data-detail=\'' . htmlspecialchars(json_encode($servicio)) . '\' title="Ver Ficha"><i class="fa-solid fa-eye"></i> Ver Ficha</button>';
 
     $actionsContent .= '</div>';
 
     echo '<tr>';
     echo '<td>#' . $id . '</td>';
-    echo '<td style="font-weight: bold;">' . htmlspecialchars($servicio['client_name'] ?? 'N/A') . '</td>';
+    echo '<td class="u-fw-bold">' . htmlspecialchars($servicio['client_name'] ?? 'N/A') . '</td>';
     echo '<td>' . htmlspecialchars($servicio['client_phone']) . '</td>';
     echo '<td>' . htmlspecialchars($servicio['service_type']) . '</td>';
     echo '<td>' . $cita_info . '</td>';
@@ -137,7 +137,7 @@ include 'includes/header.php';
 
     <div class="controls-panel">
         <label for="filter-status">Filtrar por Estado:</label>
-        <form method="GET" style="display: inline;">
+        <form method="GET" class="u-inline">
             <select name="status" id="filter-status" onchange="this.form.submit()">
                 <option value="all" <?php echo $status_filter == 'all' ? 'selected' : ''; ?>>Todos los Servicios</option>
                 <option value="Pendiente" <?php echo $status_filter == 'Pendiente' ? 'selected' : ''; ?>>Pendientes
@@ -173,7 +173,7 @@ include 'includes/header.php';
             </tbody>
         </table>
         <p id="no-reservations-message-admin"
-            style="display: <?php echo empty($servicios) ? 'block' : 'none'; ?>; text-align: center; margin-top: 30px; color: var(--text-color);">
+            class="<?php echo empty($servicios) ? 'u-block' : 'u-hidden'; ?> u-mt-30 text-center text-color-global">
             No hay servicios para mostrar en este filtro.
         </p>
     </div>
@@ -183,8 +183,8 @@ include 'includes/header.php';
 
     <div id="detail-modal" class="upload-form-modal">
         <h3 class="form-subtitle">Ficha del Servicio #<span id="detail-id"></span></h3>
-        <div class="detail-content" style="color: #444; line-height: 1.6; font-size: 0.95em;">
-            <div style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+        <div class="detail-content modal-info-box">
+            <div class="modal-separator">
                 <p><strong>Cliente:</strong> <span id="detail-name"></span></p>
                 <p><strong>Teléfono:</strong> <span id="detail-phone"></span></p>
                 <p><strong>Edad:</strong> <span id="detail-age"></span> años | <strong>Email:</strong> <span id="detail-email"></span></p>
@@ -193,18 +193,17 @@ include 'includes/header.php';
             <p><strong>Dirección:</strong> <span id="detail-address"></span></p>
             <p><strong>Programación:</strong> <span id="detail-scheduling"></span></p>
             <p><strong>Estatus Actual:</strong> <span id="detail-status"></span></p>
-            <p><strong>Notas adicionales:</strong> <br><span id="detail-notes" style="background: #f9f9f9; display: block; padding: 10px; border-radius: 5px; margin-top: 5px;"></span></p>
+            <p><strong>Notas adicionales:</strong> <br><span id="detail-notes" class="modal-note-highlight"></span></p>
             
-            <div id="comprobante-area" style="margin-top: 15px; display: none;">
+            <div id="comprobante-area" class="u-mt-15 u-hidden">
                 <strong>Evidencia/Comprobante:</strong> <br>
-                <img id="detail-img" src=""
-                    style="max-width: 100%; border-radius: 10px; margin-top: 10px; border: 1px solid #ddd;">
+                <img id="detail-img" src="" class="modal-evidence-img">
             </div>
         </div>
         
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button type="button" class="option-btn" id="close-modal-btn" style="flex: 1;">CERRAR FICHA</button>
-            <button type="button" id="modal-delete-btn" class="btn-modal-delete" style="flex: 1;">
+        <div class="modal-footer-actions u-mt-25">
+            <button type="button" class="option-btn modal-btn-full" id="close-modal-btn">CERRAR FICHA</button>
+            <button type="button" id="modal-delete-btn" class="btn-modal-delete modal-btn-full">
                 <i class="fa-solid fa-trash-can"></i> ELIMINAR REGISTRO
             </button>
         </div>
@@ -223,7 +222,8 @@ include 'includes/header.php';
             
             // Esperar a que termine la animación (0.5s) antes de ocultar
             setTimeout(() => {
-                detailModal.style.display = 'none';
+                detailModal.classList.add('u-hidden');
+                detailModal.style.display = ''; // Limpiar inline display
                 detailModal.classList.remove('hide-anim');
             }, 500);
         }
@@ -273,7 +273,8 @@ include 'includes/header.php';
                 }
 
                 // Mostrar con animación de entrada y scroll
-                detailModal.style.display = 'block';
+                detailModal.classList.remove('u-hidden');
+                detailModal.classList.add('u-block');
                 setTimeout(() => {
                     detailModal.classList.add('show-anim');
                     detailModal.scrollIntoView({ behavior: 'smooth', block: 'start' });

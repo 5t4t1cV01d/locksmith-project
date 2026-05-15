@@ -7,30 +7,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     try {
         // 1. Obtener datos
-        $phone = htmlspecialchars(trim($_POST['telefono'] ?? ''));
-        $name = htmlspecialchars(trim($_POST['nombre'] ?? ''));
-        $address = htmlspecialchars(trim($_POST['domicilio'] ?? ''));
-        $service_type = htmlspecialchars(trim($_POST['tipo_servicio'] ?? ''));
-        $notes = htmlspecialchars(trim($_POST['notas'] ?? ''));
-        
-        // Datos de la cita
-        $fecha_cita = $_POST['fecha_cita'] ?? '';
-        $hora_cita = $_POST['hora_cita'] ?? 'Inmediato';
+        $phone = trim($_POST['telefono'] ?? '');
+        $name = trim($_POST['nombre'] ?? '');
+        $address = trim($_POST['domicilio'] ?? '');
+        $service = $_POST['tipo_servicio'] ?? '';
+        $notes = trim($_POST['notas'] ?? '');
+        $hora = $_POST['hora_cita'] ?? 'Inmediato';
 
-        // 2. Validación básica
-        if (empty($phone) || empty($service_type) || empty($notes)) {
-            throw new Exception("Faltan datos obligatorios para procesar su solicitud.");
-        }
+        if (!$phone || !$service || !$notes) throw new Exception("Faltan datos obligatorios.");
 
-        // 3. Preparar la información de la cita para las notas
-        $cita_info = "";
-        if ($service_type === 'Urgencias 24/7' || $hora_cita === 'Inmediato') {
-            $cita_info = "🚨 URGENCIA: ATENCIÓN INMEDIATA";
-        } else {
-            $cita_info = "📅 CITA PROGRAMADA: $fecha_cita a las $hora_cita";
-        }
-
-        $full_notes = "$cita_info \n\n--- DETALLES DEL CLIENTE ---\nNombre: $name \nDirección: $address \n\n--- NOTAS DEL PROBLEMA ---\n$notes";
+        $cita = ($service === 'Urgencias 24/7' || $hora === 'Inmediato') ? "🚨 URGENCIA: INMEDIATA" : "📅 CITA: {$_POST['fecha_cita']} a las $hora";
+        $full_notes = "$cita\n\n--- CLIENTE ---\n$name ($address)\n\n--- NOTAS ---\n$notes";
 
         // 4. Insertar en service_requests (Tabla unificada)
         $query_service = "INSERT INTO service_requests (client_phone, service_type, service_address, status, notes, service_date) 

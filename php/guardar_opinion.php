@@ -12,13 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $location = htmlspecialchars(trim($_POST['ubicacion'] ?? 'Mérida'));
         $is_anonymous = isset($_POST['anonimo']) ? 1 : 0;
         
-        // Manejo del nombre
-        $name = htmlspecialchars(trim($_POST['nombre'] ?? ''));
-        if ($is_anonymous || empty($name)) {
-            $display_name = "Cliente Anónimo";
-        } else {
-            $display_name = $name;
-        }
+        $display_name = ($is_anonymous || empty($name = trim($_POST['nombre'] ?? ''))) ? "Cliente Anónimo" : htmlspecialchars($name);
 
         // 2. Validación mínima
         if ($rating < 1 || $rating > 5 || empty($comment)) {

@@ -8,7 +8,7 @@ include 'includes/header.php';
 
     <div class="contact-content-wrapper">
         <?php if (isset($_GET['status'])): ?>
-            <div class="status-alert <?php echo ($_GET['status'] == 'success_opinion') ? 'success' : 'error'; ?> animate-slide" style="margin-bottom: 20px; width: 100%;">
+            <div class="status-alert <?php echo ($_GET['status'] == 'success_opinion') ? 'success' : 'error'; ?> animate-slide contact-alert">
                 <?php 
                     if ($_GET['status'] == 'success_opinion') {
                         echo "<b>✅ ¡GRACIAS POR TU OPINIÓN!</b><br>Tu reseña ha sido recibida y será publicada tras ser revisada por un administrador.";
@@ -65,7 +65,7 @@ include 'includes/header.php';
         </div>
 
         <div class="info-reveal-box" id="info-after-submit">
-            <div id="success-message" style="display: none;">
+            <div id="success-message" class="u-hidden">
             </div>
 
             <div class="info-box">

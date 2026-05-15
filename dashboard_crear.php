@@ -13,34 +13,13 @@ $status_class = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
-        $phone = htmlspecialchars(trim($_POST['phone'] ?? ''));
-        $name = htmlspecialchars(trim($_POST['name'] ?? ''));
-        $age = (int)($_POST['age'] ?? 0);
-        $email = htmlspecialchars(trim($_POST['email'] ?? ''));
-        $address = htmlspecialchars(trim($_POST['address'] ?? ''));
-        $service_type = $_POST['service_type'] ?? 'Otro';
-        $notes = htmlspecialchars(trim($_POST['notes'] ?? ''));
-
-        // Datos de la cita
-        $fecha_cita = !empty($_POST['fecha_cita']) ? $_POST['fecha_cita'] : null;
-        $hora_cita = ($_POST['hora_cita'] !== 'Inmediato') ? $_POST['hora_cita'] : null;
+        $phone = trim($_POST['phone'] ?? '');
+        $name = trim($_POST['name'] ?? '');
+        $service = $_POST['service_type'] ?? 'Otro';
+        $notes = trim($_POST['notes'] ?? '');
         
-        // Gestión de Cliente (Insertar o Actualizar)
-        $query_client = "INSERT INTO client (phone, name, address) 
-                        VALUES (:phone, :name, :address) 
-                        ON DUPLICATE KEY UPDATE name = :name2, address = :address2";
-        
-        $stmt_client = $db->prepare($query_client);
-        $stmt_client->bindParam(':phone', $phone);
-        $stmt_client->bindParam(':name', $name);
-        $stmt_client->bindParam(':name2', $name);
-        $stmt_client->bindParam(':address', $address);
-        $stmt_client->bindParam(':address2', $address);
-        $stmt_client->execute();
-
-        // Preparar información de la cita para el Admin
-        $cita_info = ($fecha_cita && $hora_cita) ? "📅 CITA: $fecha_cita $hora_cita" : "🚨 URGENCIA: ATENCIÓN INMEDIATA";
-        $full_notes = "$cita_info \n--- DATOS REGISTRO: Edad: $age | Email: $email ---\n\n--- NOTAS: ---\n" . $notes;
+        $cita_text = ($_POST['fecha_cita'] && $_POST['hora_cita'] !== 'Inmediato') ? "📅 CITA: {$_POST['fecha_cita']} {$_POST['hora_cita']}" : "🚨 URGENCIA: INMEDIATA";
+        $full_notes = "$cita_text\n--- REGISTRO: Edad: {$_POST['age']} | Email: {$_POST['email']} ---\n\n--- NOTAS: ---\n$notes";
 
         // Crear la Orden de Servicio
         $query_service = "INSERT INTO service_requests (client_phone, age, service_type, service_address, appointment_date, appointment_time, status, notes, service_date) 
@@ -82,7 +61,7 @@ include 'includes/header.php';
             <form id="create-service-form" class="admin-form" method="POST" action="dashboard_crear.php">
 
                 <!-- PASO 1: IDENTIFICACIÓN -->
-                <div id="phone-step" class="form-group phone-highlight-box" style="display: block;">
+                <div id="phone-step" class="form-group phone-highlight-box u-block">
                     <label for="phone" class="phone-label-premium">TELÉFONO DEL CLIENTE:</label>
                     <input type="tel" id="phone" name="phone" placeholder="Ej: 9991234567" class="phone-input-premium">
                     <div id="phone-status" class="phone-status-info"></div>
@@ -163,12 +142,12 @@ include 'includes/header.php';
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-top: 15px;">
+                    <div class="form-group u-mt-15">
                         <label for="notes">NOTAS O DIAGNÓSTICO INICIAL:</label>
                         <textarea id="notes" name="notes" rows="3" placeholder="Ej: Llave quebrada dentro del cilindro..."></textarea>
                     </div>
                     
-                    <button type="submit" class="option-btn btn-full-width" id="save-user-btn" style="background-color: var(--2main-color); color: #000; font-weight: 900; margin-top: 20px;">CREAR ORDEN DE SERVICIO</button>
+                    <button type="submit" class="option-btn btn-submit-order" id="save-user-btn">CREAR ORDEN DE SERVICIO</button>
                 </div>
             </form>
         </div>

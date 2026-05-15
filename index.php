@@ -56,13 +56,13 @@ include 'includes/header.php';
         <div class="map-embed">
             <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7450.253560427556!2d-89.65256250642089!3d20.987554500000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f5673f2bf60dec7%3A0x838fa69a42c69d12!2sLA%20GANZUA!5e0!3m2!1ses-419!2smx!4v1778345005122!5m2!1ses-419!2smx"
-                width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                width="100%" height="450" class="no-border" allowfullscreen="" loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <div class="map-view-360">
             <iframe
                 src="https://www.google.com/maps/embed?pb=!4v1778345816975!6m8!1m7!1s1LUufCHbyvkLx71Le9tejA!2m2!1d20.98746847783517!2d-89.6430532406101!3f358.2608454630871!4f-2.254009096408737!5f1.4602863493673333"
-                width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"
+                width="100%" height="450" class="no-border" allowfullscreen="" loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
     </div>
