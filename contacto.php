@@ -7,6 +7,17 @@ include 'includes/header.php';
     <h2 class="contact-title">Contáctanos</h2>
 
     <div class="contact-content-wrapper">
+        <?php if (isset($_GET['status'])): ?>
+            <div class="status-alert <?php echo ($_GET['status'] == 'success_opinion') ? 'success' : 'error'; ?> animate-slide" style="margin-bottom: 20px; width: 100%;">
+                <?php 
+                    if ($_GET['status'] == 'success_opinion') {
+                        echo "<b>✅ ¡GRACIAS POR TU OPINIÓN!</b><br>Tu reseña ha sido recibida y será publicada tras ser revisada por un administrador.";
+                    } else {
+                        echo "<b>❌ ERROR:</b> " . htmlspecialchars($_GET['msg'] ?? 'No se pudo procesar tu opinión.');
+                    }
+                ?>
+            </div>
+        <?php endif; ?>
 
         <div class="contact-form-wrapper" id="form-content">
             <p class="form-instruction">¿Cómo fue tu experiencia con <strong>LA GANZUA</strong>? Tu opinión nos ayuda a seguir brindando un servicio de excelencia en Mérida.</p>

@@ -94,6 +94,37 @@ body.login-background {
     overflow: hidden;
 }
 
+/* =================================
+   ADMIN: GESTIÓN DE OPINIONES
+   ================================= */
+.delete-review-btn {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+    z-index: 100;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    display: inline-block !important;
+}
+
+.delete-review-btn:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.delete-review-btn img {
+    width: 100% !important;
+    height: 100% !important;
+    /* Filtro para ROJO CLARO VIBRANTE */
+    filter: invert(53%) sepia(94%) saturate(2337%) hue-rotate(324deg) brightness(101%) contrast(101%);
+    display: inline-block;
+}
+
 .center-image {
     position: absolute;
     top: 50%;

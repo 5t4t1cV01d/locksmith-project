@@ -1,5 +1,6 @@
 <?php
 // ARCHIVO: servicios.php
+require_once 'conexion.php';
 $current_page = 'servicios';
 include 'includes/header.php';
 ?>
@@ -135,29 +136,64 @@ include 'includes/header.php';
     <p class="opinions-subtitle">La confianza de Mérida respalda nuestro trabajo profesional.</p>
 
     <div class="opinions-container">
-        <div class="opinion-card">
-            <div class="stars">★★★★★</div>
-            <p class="opinion-text">"Excelente servicio, llegaron en menos de 20 minutos a mi domicilio. Muy
-                profesionales y el precio fue justo."</p>
-            <h4 class="client-name">Juan Pérez</h4>
-            <span class="client-location">Mérida Centro</span>
-        </div>
+        <?php
+        try {
+            $db = getDB();
+            $query_reviews = "SELECT * FROM reviews ORDER BY created_at DESC LIMIT 6";
+            $stmt_reviews = $db->query($query_reviews);
+            $db_reviews = $stmt_reviews->fetchAll(PDO::FETCH_ASSOC);
 
-        <div class="opinion-card">
-            <div class="stars">★★★★★</div>
-            <p class="opinion-text">"Cambiaron todas las cerraduras de mi nueva casa. Me dieron garantía por escrito y
-                asesoría técnica."</p>
-            <h4 class="client-name">María García</h4>
-            <span class="client-location">Fracc. Las Américas</span>
-        </div>
+            if ($db_reviews) {
+                $is_admin = isset($_SESSION['user_id']); // Detectar si hay sesión iniciada
+        
+                foreach ($db_reviews as $rev) {
+                    $stars = str_repeat('★', $rev['rating']);
+                    $rev_id = $rev['id'];
 
-        <div class="opinion-card">
-            <div class="stars">★★★★★</div>
-            <p class="opinion-text">"Me quedé fuera de mi auto y lo abrieron sin dañarlo. Muy recomendados para
-                urgencias automotrices."</p>
-            <h4 class="client-name">Ricardo Luna</h4>
-            <span class="client-location">Caucel</span>
-        </div>
+                    echo '<div class="opinion-card animate-slide" style="position: relative;">';
+
+                    // BOTÓN ELIMINAR (Solo para Administradores con Icono SVG)
+                    if ($is_admin) {
+                        echo '<a href="php/eliminar_opinion.php?id=' . $rev_id . '" 
+                                 onclick="return confirm(\'¿Estás seguro de eliminar esta opinión?\')"
+                                 class="delete-review-btn" 
+                                 title="Eliminar Opinión">
+                                 <img src="img/icons/cancel.svg" alt="Eliminar" style="width: 100%;">
+                              </a>';
+                    }
+
+                    echo '    <div class="stars">' . $stars . '</div>';
+                    echo '    <p class="opinion-text">"' . htmlspecialchars($rev['comment']) . '"</p>';
+                    echo '    <h4 class="client-name">' . htmlspecialchars($rev['client_name']) . '</h4>';
+                    echo '    <span class="client-location">' . htmlspecialchars($rev['service_location']) . '</span>';
+                    echo '</div>';
+                }
+            } else {
+                // FALLBACK: Opiniones de ejemplo si la BD está vacía
+                echo '
+                <div class="opinion-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="opinion-text">"Excelente servicio, llegaron en menos de 20 minutos a mi domicilio. Muy profesionales y el precio fue justo."</p>
+                    <h4 class="client-name">Juan Pérez</h4>
+                    <span class="client-location">Mérida Centro</span>
+                </div>
+                <div class="opinion-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="opinion-text">"Cambiaron todas las cerraduras de mi nueva casa. Me dieron garantía por escrito y asesoría técnica."</p>
+                    <h4 class="client-name">María García</h4>
+                    <span class="client-location">Fracc. Las Américas</span>
+                </div>
+                <div class="opinion-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="opinion-text">"Me quedé fuera de mi auto y lo abrieron sin dañarlo. Muy recomendados para urgencias automotrices."</p>
+                    <h4 class="client-name">Ricardo Luna</h4>
+                    <span class="client-location">Caucel</span>
+                </div>';
+            }
+        } catch (Exception $e) {
+            echo "<p>Error al cargar opiniones.</p>";
+        }
+        ?>
     </div>
 </section>
 
