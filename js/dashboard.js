@@ -69,11 +69,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             addressInput.value = data.client.address || '';
                             clientDataStep.style.display = 'none';
                             workDetailsStep.style.display = 'block';
+                            submitBtn.textContent = "SOLICITAR";
                         } else {
                             phoneStatus.classList.add('status-new');
                             phoneStatus.innerHTML = "➕ Cliente nuevo. Registre sus datos.";
                             clientDataStep.style.display = 'block';
                             workDetailsStep.style.display = 'block';
+                            submitBtn.textContent = "REGISTRAR Y SOLICITAR";
                         }
                     })
                     .catch(err => {
@@ -135,8 +137,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (clientDataStep.style.display !== 'none') {
                 if (nameInput.value.trim().length < 3) regErrors.push("Nombre demasiado corto.");
-                if (ageInput && (!ageInput.value || ageInput.value < 18)) regErrors.push("Debe ser mayor de 18 años.");
-                if (addressInput.value.trim().length < 10) regErrors.push("Dirección insuficiente.");
+                if (ageInput && (!ageInput.value || ageInput.value < 18 || ageInput.value > 100)) {
+                    regErrors.push("La edad debe estar entre 18 y 100 años.");
+                }
+                if (addressInput.value.trim().length < 10) regErrors.push("Dirección insuficiente (mínimo 10 caracteres).");
             }
 
             if (!serviceTypeInput.value) serviceErrors.push("Falta tipo de servicio.");

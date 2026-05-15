@@ -22,8 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $notes = htmlspecialchars(trim($_POST['notes'] ?? ''));
 
         // Datos de la cita
-        $fecha_cita = $_POST['fecha_cita'] ?? '';
-        $hora_cita = $_POST['hora_cita'] ?? 'Inmediato';
+        $fecha_cita = !empty($_POST['fecha_cita']) ? $_POST['fecha_cita'] : null;
+        $hora_cita = ($_POST['hora_cita'] !== 'Inmediato') ? $_POST['hora_cita'] : null;
         
         // Gestión de Cliente (Insertar o Actualizar)
         $query_client = "INSERT INTO client (phone, name, address) 
@@ -39,23 +39,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_client->execute();
 
         // Preparar información de la cita para el Admin
-        $cita_info = "";
-        if ($service_type === 'Urgencias 24/7' || $hora_cita === 'Inmediato') {
-            $cita_info = "🚨 URGENCIA: ATENCIÓN INMEDIATA";
-        } else {
-            $cita_info = "📅 CITA PROGRAMADA: $fecha_cita a las $hora_cita";
-        }
-
+        $cita_info = ($fecha_cita && $hora_cita) ? "📅 CITA: $fecha_cita $hora_cita" : "🚨 URGENCIA: ATENCIÓN INMEDIATA";
         $full_notes = "$cita_info \n--- DATOS REGISTRO: Edad: $age | Email: $email ---\n\n--- NOTAS: ---\n" . $notes;
 
         // Crear la Orden de Servicio
-        $query_service = "INSERT INTO service_requests (client_phone, service_type, service_address, status, notes, service_date) 
-                          VALUES (:phone, :type, :address, 'Pendiente', :notes, NOW())";
+        $query_service = "INSERT INTO service_requests (client_phone, age, service_type, service_address, appointment_date, appointment_time, status, notes, service_date) 
+                          VALUES (:phone, :age, :type, :address, :fecha_cita, :hora_cita, 'Pendiente', :notes, NOW())";
         
         $stmt_service = $db->prepare($query_service);
         $stmt_service->bindParam(':phone', $phone);
+        $stmt_service->bindParam(':age', $age);
         $stmt_service->bindParam(':type', $service_type);
         $stmt_service->bindParam(':address', $address);
+        $stmt_service->bindParam(':fecha_cita', $fecha_cita);
+        $stmt_service->bindParam(':hora_cita', $hora_cita);
         $stmt_service->bindParam(':notes', $full_notes);
         
         if ($stmt_service->execute()) {
@@ -85,8 +82,8 @@ include 'includes/header.php';
             <form id="create-service-form" class="admin-form" method="POST" action="dashboard_crear.php">
 
                 <!-- PASO 1: IDENTIFICACIÓN -->
-                <div id="phone-step" class="form-group phone-highlight-box">
-                    <label for="phone" class="phone-label-premium">TELÉFONO DEL CLIENTE (ID):</label>
+                <div id="phone-step" class="form-group phone-highlight-box" style="display: block;">
+                    <label for="phone" class="phone-label-premium">TELÉFONO DEL CLIENTE:</label>
                     <input type="tel" id="phone" name="phone" placeholder="Ej: 9991234567" class="phone-input-premium">
                     <div id="phone-status" class="phone-status-info"></div>
                 </div>
@@ -167,16 +164,42 @@ include 'includes/header.php';
                     </div>
 
                     <div class="form-group" style="margin-top: 15px;">
-                        <label for="notes">NOTAS O DIAGNÓSTICO INICIAL (OBLIGATORIO):</label>
-                        <textarea id="notes" name="notes" rows="3" placeholder="Ej: Llave quebrada dentro del cilindro, requiere cambio de combinación..."></textarea>
+                        <label for="notes">NOTAS O DIAGNÓSTICO INICIAL:</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Ej: Llave quebrada dentro del cilindro..."></textarea>
                     </div>
                     
-                    <button type="submit" class="option-btn btn-full-width" id="save-user-btn">CREAR ORDEN DE SERVICIO</button>
+                    <button type="submit" class="option-btn btn-full-width" id="save-user-btn" style="background-color: var(--2main-color); color: #000; font-weight: 900; margin-top: 20px;">CREAR ORDEN DE SERVICIO</button>
                 </div>
             </form>
         </div>
     </section>
 
 <script src="js/dashboard.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('phone');
+    const nameInput = document.getElementById('name');
+    const submitBtn = document.getElementById('save-user-btn');
+
+    function updateBtn() {
+        const phone = phoneInput.value.trim();
+        const name = nameInput.value.trim();
+        
+        if (phone.length >= 10) {
+            // Si el nombre está vacío, asumimos que es registro nuevo
+            if (name === "") {
+                submitBtn.textContent = "REGISTRAR CLIENTE Y SOLICITAR";
+            } else {
+                submitBtn.textContent = "CREAR ORDEN DE TRABAJO";
+            }
+        } else {
+            submitBtn.textContent = "SOLICITAR SERVICIO";
+        }
+    }
+
+    phoneInput.addEventListener('input', updateBtn);
+    nameInput.addEventListener('input', updateBtn);
+});
+</script>
 
 <?php include 'includes/footer.php'; ?>

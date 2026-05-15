@@ -26,27 +26,35 @@ function render_admin_service_row($servicio)
     $class = $status_class_map[$status] ?? 'status-default';
     $id = htmlspecialchars($servicio['id']);
 
-    $actionsContent = '<div class="admin-actions-container">';
+    // Lógica de Programación / Cita
+    $cita_info = '<span style="color: #ea3323; font-weight: 900;">🚨 INMEDIATO</span>';
+    if (!empty($servicio['appointment_date'])) {
+        $cita_info = '<b>📅 ' . htmlspecialchars($servicio['appointment_date']) . '</b><br>';
+        $cita_info .= '<small>⏰ ' . htmlspecialchars($servicio['appointment_time']) . '</small>';
+    }
+
+    $actionsContent = '<div class="admin-actions-grid">';
 
     if ($status === 'Pendiente') {
-        $actionsContent .= '<a href="dashboard_ver.php?action=process&id=' . $id . '" class="action-btn approve-btn">Atender</a>';
+        $actionsContent .= '<a href="dashboard_ver.php?action=process&id=' . $id . '" class="action-btn-mini btn-atender" title="Atender"><i class="fa-solid fa-truck-fast"></i> Atender</a>';
+        $actionsContent .= '<a href="dashboard_ver.php?action=complete&id=' . $id . '" class="action-btn-mini btn-finalizar" title="Finalizar"><i class="fa-solid fa-check-double"></i> Finalizar</a>';
+        $actionsContent .= '<button class="action-btn-mini btn-cancelar cancel-trigger" data-id="' . $id . '" title="Cancelar" style="grid-column: span 2;"><i class="fa-solid fa-xmark"></i> Cancelar</button>';
+    } elseif ($status === 'En Camino') {
+        $actionsContent .= '<a href="dashboard_ver.php?action=complete&id=' . $id . '" class="action-btn-mini btn-finalizar" title="Finalizar" style="grid-column: span 2;"><i class="fa-solid fa-check-double"></i> Finalizar</a>';
+        $actionsContent .= '<button class="action-btn-mini btn-cancelar cancel-trigger" data-id="' . $id . '" title="Cancelar" style="grid-column: span 2;"><i class="fa-solid fa-xmark"></i> Cancelar</button>';
     }
 
-    if ($status != 'Completado' && $status != 'Cancelado') {
-        $actionsContent .= '<a href="dashboard_ver.php?action=complete&id=' . $id . '" class="action-btn approve-btn" style="background:#28a745">Finalizar</a>';
-        $actionsContent .= '<button class="action-btn cancel-btn cancel-trigger" data-id="' . $id . '">Cancelar</button>';
-    }
-
-    $actionsContent .= '<button class="action-btn view-btn view-trigger" data-detail=\'' . htmlspecialchars(json_encode($servicio)) . '\'>Ver Ficha</button>';
+    $actionsContent .= '<button class="action-btn-mini btn-ver view-trigger" data-detail=\'' . htmlspecialchars(json_encode($servicio)) . '\' title="Ver Ficha" style="grid-column: span 2;"><i class="fa-solid fa-eye"></i> Ver Ficha</button>';
 
     $actionsContent .= '</div>';
 
     echo '<tr>';
     echo '<td>#' . $id . '</td>';
-    echo '<td><strong>' . htmlspecialchars($servicio['client_phone']) . '</strong></td>';
+    echo '<td style="font-weight: bold;">' . htmlspecialchars($servicio['client_name'] ?? 'N/A') . '</td>';
+    echo '<td>' . htmlspecialchars($servicio['client_phone']) . '</td>';
     echo '<td>' . htmlspecialchars($servicio['service_type']) . '</td>';
+    echo '<td>' . $cita_info . '</td>';
     echo '<td>' . htmlspecialchars($servicio['service_address']) . '</td>';
-    echo '<td>' . htmlspecialchars($servicio['service_date']) . '</td>';
     echo '<td><span class="' . $class . '">' . $status . '</span></td>';
     echo '<td>' . $actionsContent . '</td>';
     echo '</tr>';
@@ -56,13 +64,12 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = (int) $_GET['id'];
     $action = $_GET['action'];
     $new_status = '';
+    $delete_record = false;
 
-    if ($action == 'process')
-        $new_status = 'En Camino';
-    if ($action == 'complete')
-        $new_status = 'Completado';
-    if ($action == 'cancel')
-        $new_status = 'Cancelado';
+    if ($action == 'process') $new_status = 'En Camino';
+    if ($action == 'complete') $new_status = 'Completado';
+    if ($action == 'cancel') $new_status = 'Cancelado';
+    if ($action == 'delete') $delete_record = true;
 
     if ($new_status) {
         try {
@@ -77,14 +84,29 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         } catch (PDOException $e) {
         }
     }
+
+    if ($delete_record) {
+        try {
+            $query_delete = "DELETE FROM service_requests WHERE id = :id";
+            $stmt_delete = $db->prepare($query_delete);
+            $stmt_delete->bindParam(':id', $id);
+            $stmt_delete->execute();
+
+            header("Location: dashboard_ver.php?status_msg=" . urlencode("Servicio #$id eliminado permanentemente."));
+            exit();
+        } catch (PDOException $e) {
+        }
+    }
 }
 
 try {
-    $query = "SELECT * FROM service_requests ";
+    $query = "SELECT s.*, c.name as client_name, c.age, c.email 
+              FROM service_requests s
+              LEFT JOIN client c ON s.client_phone = c.phone ";
     if ($status_filter != 'all') {
-        $query .= " WHERE status = :status_filter";
+        $query .= " WHERE s.status = :status_filter";
     }
-    $query .= " ORDER BY created_at DESC";
+    $query .= " ORDER BY s.created_at DESC";
 
     $stmt = $db->prepare($query);
     if ($status_filter != 'all') {
@@ -135,12 +157,13 @@ include 'includes/header.php';
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Tel. Cliente</th>
-                    <th>Tipo Servicio</th>
-                    <th>Ubicación</th>
-                    <th>Fecha/Hora</th>
-                    <th>Estatus</th>
-                    <th>Acciones</th>
+                    <th>NOMBRE</th>
+                    <th>TELÉFONO</th>
+                    <th>SERVICIO</th>
+                    <th>PROGRAMACIÓN</th>
+                    <th>DIRECCIÓN</th>
+                    <th>ESTADO</th>
+                    <th>ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="admin-reservations-table-body">
@@ -155,29 +178,57 @@ include 'includes/header.php';
         </p>
     </div>
 
-    <div id="detail-modal" class="upload-form-modal" style="display: none;">
+    <!-- Fondo oscuro para el modal -->
+    <div id="modal-overlay" class="modal-overlay"></div>
+
+    <div id="detail-modal" class="upload-form-modal">
         <h3 class="form-subtitle">Ficha del Servicio #<span id="detail-id"></span></h3>
-        <div class="detail-content" style="color: #444; line-height: 1.8;">
-            <p><strong>Teléfono Cliente:</strong> <span id="detail-phone"></span></p>
+        <div class="detail-content" style="color: #444; line-height: 1.6; font-size: 0.95em;">
+            <div style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                <p><strong>Cliente:</strong> <span id="detail-name"></span></p>
+                <p><strong>Teléfono:</strong> <span id="detail-phone"></span></p>
+                <p><strong>Edad:</strong> <span id="detail-age"></span> años | <strong>Email:</strong> <span id="detail-email"></span></p>
+            </div>
             <p><strong>Tipo de Servicio:</strong> <span id="detail-type"></span></p>
             <p><strong>Dirección:</strong> <span id="detail-address"></span></p>
-            <p><strong>Fecha Programada:</strong> <span id="detail-date"></span></p>
+            <p><strong>Programación:</strong> <span id="detail-scheduling"></span></p>
             <p><strong>Estatus Actual:</strong> <span id="detail-status"></span></p>
-            <p><strong>Notas adicionales:</strong> <span id="detail-notes"></span></p>
+            <p><strong>Notas adicionales:</strong> <br><span id="detail-notes" style="background: #f9f9f9; display: block; padding: 10px; border-radius: 5px; margin-top: 5px;"></span></p>
+            
             <div id="comprobante-area" style="margin-top: 15px; display: none;">
                 <strong>Evidencia/Comprobante:</strong> <br>
                 <img id="detail-img" src=""
                     style="max-width: 100%; border-radius: 10px; margin-top: 10px; border: 1px solid #ddd;">
             </div>
         </div>
-        <button type="button" class="option-btn" onclick="document.getElementById('detail-modal').style.display='none';"
-            style="margin-top: 20px;">CERRAR FICHA</button>
+        
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button type="button" class="option-btn" id="close-modal-btn" style="flex: 1;">CERRAR FICHA</button>
+            <button type="button" id="modal-delete-btn" class="btn-modal-delete" style="flex: 1;">
+                <i class="fa-solid fa-trash-can"></i> ELIMINAR REGISTRO
+            </button>
+        </div>
     </div>
 </section>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const detailModal = document.getElementById('detail-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        function closeModal() {
+            // Animación de salida suave
+            detailModal.classList.add('hide-anim');
+            detailModal.classList.remove('show-anim');
+            
+            // Esperar a que termine la animación (0.5s) antes de ocultar
+            setTimeout(() => {
+                detailModal.style.display = 'none';
+                detailModal.classList.remove('hide-anim');
+            }, 500);
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
 
         document.querySelectorAll('.cancel-trigger').forEach(button => {
             button.addEventListener('click', function () {
@@ -193,12 +244,23 @@ include 'includes/header.php';
                 const data = JSON.parse(this.getAttribute('data-detail'));
 
                 document.getElementById('detail-id').textContent = data.id;
+                document.getElementById('detail-name').textContent = data.client_name || 'Cliente Particular';
                 document.getElementById('detail-phone').textContent = data.client_phone;
+                document.getElementById('detail-age').textContent = data.age || '--';
+                document.getElementById('detail-email').textContent = data.email || '--';
+                
                 document.getElementById('detail-type').textContent = data.service_type;
-                document.getElementById('detail-status').textContent = data.status;
                 document.getElementById('detail-address').textContent = data.service_address;
-                document.getElementById('detail-date').textContent = data.service_date;
-                document.getElementById('detail-notes').textContent = data.notes || 'Sin notas';
+                
+                // Lógica de programación (Fecha/Hora)
+                let sched = "<span style='color:#ea3323; font-weight:bold;'>🚨 INMEDIATO (Urgencia)</span>";
+                if(data.appointment_date && data.appointment_date !== '0000-00-00') {
+                    sched = "<b>📅 " + data.appointment_date + "</b> | ⏰ " + (data.appointment_time || '');
+                }
+                document.getElementById('detail-scheduling').innerHTML = sched;
+                
+                document.getElementById('detail-status').textContent = data.status;
+                document.getElementById('detail-notes').textContent = data.notes || 'Sin notas adicionales.';
 
                 const imgArea = document.getElementById('comprobante-area');
                 const imgTag = document.getElementById('detail-img');
@@ -210,9 +272,25 @@ include 'includes/header.php';
                     imgArea.style.display = 'none';
                 }
 
+                // Mostrar con animación de entrada y scroll
                 detailModal.style.display = 'block';
-                detailModal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    detailModal.classList.add('show-anim');
+                    detailModal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 10);
+                
+                // Configurar el botón de eliminar del modal
+                const modalDeleteBtn = document.getElementById('modal-delete-btn');
+                modalDeleteBtn.setAttribute('data-id', data.id);
             });
+        });
+
+        // Event listener para el botón de eliminar del modal
+        document.getElementById('modal-delete-btn').addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            if (confirm(`⚠️ ¡ADVERTENCIA CRÍTICA! \n\n¿Está seguro que desea ELIMINAR permanentemente el servicio #${id}?\nEsta acción borrará los datos de la base de datos y no se puede deshacer.`)) {
+                window.location.href = `dashboard_ver.php?action=delete&id=${id}`;
+            }
         });
     });
 </script>
