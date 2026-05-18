@@ -5,7 +5,7 @@
 **LA GANZUA** es una plataforma web completa para la gestión profesional de servicios de cerrajería. El sistema cubre desde el portal público donde los clientes solicitan sus servicios, hasta un panel administrativo privado con control total (CRUD) sobre las órdenes de trabajo, el personal y las reseñas de clientes.
 
 > Proyecto Final — Materia: Programación Web  
-> Institución: Universidad Politécnica de Yucatán  
+> Institución: Instituto Tecnológico de Mérida (ITM) 
 > Docente: MINE. Héctor Cetina Cordero
 
 ---
