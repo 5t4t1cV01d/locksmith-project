@@ -63,6 +63,8 @@ $home_url = $is_dashboard ? 'dashboard_ver.php' : 'index.php';
                                 SERVICIOS</a></li>
                         <li><a href="dashboard_crear.php"
                                 class="<?php echo ($current_page == 'dashboard_crear') ? 'active-link' : ''; ?>">NUEVA ORDEN DE TRABAJO</a></li>
+                        <li><a href="dashboard_trabajadores.php"
+                                class="<?php echo ($current_page == 'dashboard_trabajadores') ? 'active-link' : ''; ?>">TRABAJADORES</a></li>
                     </ul>
                 <?php endif; ?>
 

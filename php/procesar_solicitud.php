@@ -12,22 +12,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $address = trim($_POST['domicilio'] ?? '');
         $service = $_POST['tipo_servicio'] ?? '';
         $notes = trim($_POST['notas'] ?? '');
-        $hora = $_POST['hora_cita'] ?? 'Inmediato';
+        $fecha_cita = !empty($_POST['fecha_cita']) ? trim($_POST['fecha_cita']) : null;
+        $hora_cita = !empty($_POST['hora_cita']) && $_POST['hora_cita'] !== 'Inmediato' ? trim($_POST['hora_cita']) : null;
 
         if (!$phone || !$service || !$notes) throw new Exception("Faltan datos obligatorios.");
 
-        $cita = ($service === 'Urgencias 24/7' || $hora === 'Inmediato') ? "🚨 URGENCIA: INMEDIATA" : "📅 CITA: {$_POST['fecha_cita']} a las $hora";
-        $full_notes = "$cita\n\n--- CLIENTE ---\n$name ($address)\n\n--- NOTAS ---\n$notes";
+        // Recuperar edad del cliente existente
+        $stmt_age = $db->prepare("SELECT age FROM client WHERE phone = :phone");
+        $stmt_age->execute([':phone' => $phone]);
+        $client_data = $stmt_age->fetch(PDO::FETCH_ASSOC);
+        $age = $client_data ? (int)$client_data['age'] : 0;
 
-        // 4. Insertar en service_requests (Tabla unificada)
-        $query_service = "INSERT INTO service_requests (client_phone, service_type, service_address, status, notes, service_date) 
-                          VALUES (:phone, :type, :address, 'Pendiente', :notes, NOW())";
+        // 4. Insertar en service_requests
+        $query_service = "INSERT INTO service_requests (client_phone, age, service_type, service_address, appointment_date, appointment_time, status, notes, service_date) 
+                          VALUES (:phone, :age, :type, :address, :fecha_cita, :hora_cita, 'Pendiente', :notes, NOW())";
         
         $stmt_service = $db->prepare($query_service);
         $stmt_service->bindParam(':phone', $phone);
-        $stmt_service->bindParam(':type', $service_type);
+        $stmt_service->bindParam(':age', $age);
+        $stmt_service->bindParam(':type', $service);
         $stmt_service->bindParam(':address', $address);
-        $stmt_service->bindParam(':notes', $full_notes);
+        $stmt_service->bindParam(':fecha_cita', $fecha_cita);
+        $stmt_service->bindParam(':hora_cita', $hora_cita);
+        $stmt_service->bindParam(':notes', $notes);
         
         if ($stmt_service->execute()) {
             header("Location: ../solicitar.php?status=success");

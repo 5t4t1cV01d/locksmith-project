@@ -15,11 +15,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         $phone = trim($_POST['phone'] ?? '');
         $name = trim($_POST['name'] ?? '');
-        $service = $_POST['service_type'] ?? 'Otro';
+        $age = isset($_POST['age']) && $_POST['age'] !== '' ? (int)$_POST['age'] : 0;
+        $email = trim($_POST['email'] ?? '');
+        $address = trim($_POST['address'] ?? '');
+        $service_type = $_POST['service_type'] ?? 'Otro';
+        $fecha_cita = !empty($_POST['fecha_cita']) ? trim($_POST['fecha_cita']) : null;
+        $hora_cita = !empty($_POST['hora_cita']) && $_POST['hora_cita'] !== 'Inmediato' ? trim($_POST['hora_cita']) : null;
         $notes = trim($_POST['notes'] ?? '');
-        
-        $cita_text = ($_POST['fecha_cita'] && $_POST['hora_cita'] !== 'Inmediato') ? "📅 CITA: {$_POST['fecha_cita']} {$_POST['hora_cita']}" : "🚨 URGENCIA: INMEDIATA";
-        $full_notes = "$cita_text\n--- REGISTRO: Edad: {$_POST['age']} | Email: {$_POST['email']} ---\n\n--- NOTAS: ---\n$notes";
+
+        // Registrar nuevo cliente si no existe
+        if (!empty($name)) {
+            $check_client = $db->prepare("SELECT phone FROM client WHERE phone = :phone");
+            $check_client->execute([':phone' => $phone]);
+            if ($check_client->rowCount() == 0) {
+                $insert_client = $db->prepare("INSERT INTO client (phone, name, age, email, address) VALUES (:phone, :name, :age, :email, :address)");
+                $insert_client->execute([
+                    ':phone' => $phone,
+                    ':name' => $name,
+                    ':age' => $age,
+                    ':email' => $email,
+                    ':address' => $address
+                ]);
+            }
+        }
 
         // Crear la Orden de Servicio
         $query_service = "INSERT INTO service_requests (client_phone, age, service_type, service_address, appointment_date, appointment_time, status, notes, service_date) 
@@ -32,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_service->bindParam(':address', $address);
         $stmt_service->bindParam(':fecha_cita', $fecha_cita);
         $stmt_service->bindParam(':hora_cita', $hora_cita);
-        $stmt_service->bindParam(':notes', $full_notes);
+        $stmt_service->bindParam(':notes', $notes);
         
         if ($stmt_service->execute()) {
             $order_id = $db->lastInsertId();
