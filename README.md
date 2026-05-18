@@ -23,6 +23,7 @@
 | ![Pantalla de Login](img/vistaGeneral/screen-login.png) | **Login:** Portal de acceso al panel de administración. |
 | ![Pantalla del Dashboard](img/vistaGeneral/screen-dashboard.png) | **Dashboard:** Tabla de gestión de servicios activos. |
 | ![Pantalla de Ficha](img/vistaGeneral/screen-ficha.png) | **Ficha Modal:** Detalles completos de un servicio con monto estimado. |
+| ![Pantalla de Nueva Orden](img/vistaGeneral/screen-orden.png) | **Nueva Orden:** Formulario administrativo para registrar servicios. |
 | ![Pantalla de Trabajadores](img/vistaGeneral/screen-trabajadores.png) | **Trabajadores:** Módulo de alta y baja de personal. |
 
 ---
@@ -303,6 +304,7 @@ U5_proyect-Cerrajeria/
         ├── screen-login.png
         ├── screen-dashboard.png
         ├── screen-ficha.png
+        ├── screen-orden.png
         └── screen-trabajadores.png
 ```
 
