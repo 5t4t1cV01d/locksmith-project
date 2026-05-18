@@ -292,18 +292,18 @@ U5_proyect-Cerrajeria/
 │   └── seguridad.php              # (referencia) funciones de protección
 │
 ├── img/
-│   ├── full_logo_tr.svg           # Logotipo vectorial del negocio
-│   ├── icons/                     # Iconos SVG de la interfaz
-│   ├── servicios/                 # Imágenes del catálogo de servicios
-│   └── vistaGeneral/              # Capturas de pantalla del sistema
-│       ├── screen-inicio.png
-│       ├── screen-servicios.png
-│       ├── screen-solicitar.png
-│       ├── screen-contacto.png
-│       ├── screen-login.png
-│       ├── screen-dashboard.png
-│       ├── screen-ficha.png
-│       └── screen-trabajadores.png
+    ├── full_logo_tr.svg           # Logotipo vectorial del negocio
+    ├── icons/                     # Iconos SVG de la interfaz
+    ├── servicios/                 # Imágenes del catálogo de servicios
+    └── vistaGeneral/              # Capturas de pantalla del sistema
+        ├── screen-inicio.png
+        ├── screen-servicios.png
+        ├── screen-solicitar.png
+        ├── screen-contacto.png
+        ├── screen-login.png
+        ├── screen-dashboard.png
+        ├── screen-ficha.png
+        └── screen-trabajadores.png
 ```
 
 ---
