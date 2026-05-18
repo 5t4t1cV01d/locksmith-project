@@ -304,8 +304,6 @@ U5_proyect-Cerrajeria/
 │       ├── screen-dashboard.png
 │       ├── screen-ficha.png
 │       └── screen-trabajadores.png
-│
-└── uploads/                       # Comprobantes de pago subidos por clientes
 ```
 
 ---
