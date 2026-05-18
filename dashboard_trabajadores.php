@@ -58,8 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $status_message = 'Ya existe un trabajador con ese email.';
                 $status_class   = 'error';
             } else {
-                // Bcrypt costo 10
-                $hashed = password_hash($password, PASSWORD_BCRYPT, ['cost' => 10]);
+                // Cifrado centralizado mediante seguridad.php
+                $hashed = hash_password($password);
                 $stmt = $db->prepare("INSERT INTO admin (name, email, password) VALUES (:name, :email, :password)");
                 $stmt->execute([':name' => $name, ':email' => $email, ':password' => $hashed]);
                 header("Location: dashboard_trabajadores.php?status_msg=" . urlencode("Trabajador \"$name\" registrado con éxito."));
